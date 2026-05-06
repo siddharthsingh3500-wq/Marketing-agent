@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing Strategy Agent</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; }
+        .header h1 { font-size: 2.5em; font-weight: 700; }
+        .header p { opacity: 0.9; margin-top: 8px; font-size: 1.1em; }
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        .card { background: #1a1a2e; border-radius: 16px; padding: 35px; margin-bottom: 25px; border: 1px solid #2a2a4a; }
+        .card h2 { color: #667eea; margin-bottom: 20px; font-size: 1.4em; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { color: #a0a0c0; margin-bottom: 8px; font-size: 0.9em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select, .form-group textarea { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px; color: #fff; font-size: 1em; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #667eea; }
+        .form-group select option { background: #1a1a2e; }
+        .full-width { grid-column: 1 / -1; }
+        .btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-size: 1.1em; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; transition: opacity 0.3s; }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .loading { text-align: center; padding: 30px; color: #667eea; font-size: 1.1em; display: none; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #2a2a4a; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .strategies { display: none; }
+        .strategy-card { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 12px; padding: 25px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s; }
+        .strategy-card:hover { border-color: #667eea; transform: translateY(-2px); }
+        .strategy-card.selected { border-color: #667eea; background: #1a1a3e; }
+        .strategy-content { white-space: pre-wrap; line-height: 1.7; color: #c0c0e0; }
+        .refine-section { display: none; }
+        .report-section { display: none; }
+        .report-content { white-space: pre-wrap; line-height: 1.8; color: #c0c0e0; background: #0f0f1a; padding: 25px; border-radius: 12px; border: 1px solid #2a2a4a; }
+        .phase-indicator { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
+        .phase { padding: 8px 20px; border-radius: 20px; font-size: 0.85em; font-weight: 600; background: #1a1a2e; color: #606080; border: 1px solid #2a2a4a; }
+        .phase.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
+        .phase.done { background: #1a3a1a; color: #40c040; border-color: #40c040; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+        .checkbox-item { display: flex; align-items: center; gap: 6px; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: all 0.3s; }
+        .checkbox-item:hover { border-color: #667eea; }
+        .checkbox-item input { accent-color: #667eea; width: 16px; height: 16px; }
+        .checkbox-item span { color: #c0c0e0; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🎯 Marketing Strategy Agent</h1>
+    <p>AI-powered marketing strategies tailored to your business</p>
+</div>
+
+<div class="container">
+
+    <div class="phase-indicator">
+        <div class="phase active" id="phase1">① Company Profile</div>
+        <div class="phase" id="phase2">② Strategy Options</div>
+        <div class="phase" id="phase3">③ Refine</div>
+        <div class="phase" id="phase4">④ Final Report</div>
+    </div>
+
+    <div class="card" id="profileSection">
+        <h2>📋 Tell us about your company</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Company Name</label>
+                <input type="text" id="company_name" placeholder="e.g. TechStart India">
+            </div>
+            <div class="form-group">
+                <label>Industry</label>
+                <select id="industry">
+                    <option value="">Select Industry</option>
+                    <option>E-commerce</option>
+                    <option>Food & Beverage</option>
+                    <option>Healthcare</option>
+                    <option>Education</option>
+                    <option>Real Estate</option>
+                    <option>Fashion & Apparel</option>
+                    <option>Technology / SaaS</option>
+                    <option>Retail</option>
+                    <option>Finance</option>
+                    <option>Manufacturing</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Business Type</label>
+                <select id="business_type">
+                    <option value="">Select Type</option>
+                    <option>B2B (Selling to businesses)</option>
+                    <option>B2C (Selling to consumers)</option>
+                    <option>Both B2B and B2C</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Target Age Group</label>
+                <select id="target_age">
+                    <option value="">Select Age Group</option>
+                    <option>13-17 (Gen Z Teens)</option>
+                    <option>18-24 (Young Adults)</option>
+                    <option>25-35 (Millennials)</option>
+                    <option>36-50 (Gen X)</option>
+                    <option>50+ (Senior)</option>
+                    <option>All Age Groups</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Monthly Marketing Budget</label>
+                <select id="budget">
+                    <option value="">Select Budget</option>
+                    <option>Under ₹50,000</option>
+                    <option>₹50,000 - ₹2,00,000</option>
+                    <option>₹2,00,000 - ₹5,00,000</option>
+                    <option>₹5,00,000 - ₹20,00,000</option>
+                    <option>Above ₹20,00,000</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Number of Employees</label>
+                <select id="employees">
+                    <option value="">Select Size</option>
+                    <option>1-10 (Startup)</option>
+                    <option>11-50 (Small)</option>
+                    <option>51-200 (Medium)</option>
+                    <option>201-500 (Large)</option>
+                    <option>500+ (Enterprise)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Primary Goal</label>
+                <select id="goal">
+                    <option value="">Select Goal</option>
+                    <option>Brand Awareness</option>
+                    <option>Lead Generation</option>
+                    <option>Customer Retention</option>
+                    <option>Sales Growth</option>
+                    <option>Market Expansion</option>
+                    <option>Product Launch</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Location / Target Market</label>
+                <input type="text" id="location" placeholder="e.g. Mumbai, Pan India">
+            </div>
+            <div class="form-group full-width">
+                <label>Current Marketing Channels (Select all that apply)</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item"><input type="checkbox" value="Instagram"> <span>📱 Instagram</span></label>
+                    <label class="checkbox-item"><input type="checkbox" value="Facebook"> <span>📘 Facebook</span></label>
+                    <label class="checkbox-item"><input type="checkbox" value="YouTube"> <span>▶️ YouTube</span></label>
+                    <label class="checkbox-item"><input type="checkbox" value="LinkedIn"> <span>💼 LinkedIn</span></label>
+                    <label class="checkbox-item"><input type="checkbox" value="Google Ads"> <span>🔍 Google Ads</span></label>
+                    <label class="checkbox-item"><input type="checkbox" value="Email Marketing"> <span>📧 Email</span></label>
+                    <label class="checkbox-item"><input type="checkbox" value="WhatsApp"> <span>💬 WhatsApp</span></label>
+                    <label class="checkbox-item"><input type="checkbox" value="None yet"> <span>🚀 None yet</span></label>
+                </div>
+            </div>
+            <div class="form-group full-width">
+                <label>Biggest Marketing Challenge</label>
+                <select id="challenge">
+                    <option value="">Select Challenge</option>
+                    <option>Low brand awareness</option>
+                    <option>Not enough leads</option>
+                    <option>Low social media engagement</option>
+                    <option>High customer acquisition cost</option>
+                    <option>Strong competition</option>
+                    <option>Limited budget</option>
+                    <option>Unclear target audience</option>
+                    <option>Poor customer retention</option>
+                    <option>Other</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn" onclick="generateStrategies()">🚀 Generate Marketing Strategies</button>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p id="loadingText">Agent is analyzing your company profile...</p>
+    </div>
+
+    <div class="card strategies" id="strategiesSection">
+        <h2>💡 Your 3 Tailored Marketing Strategies</h2>
+        <p style="color:#a0a0c0; margin-bottom:20px;">Click on the strategy that best fits your vision</p>
+        <div id="strategiesContent"></div>
+    </div>
+
+    <div class="card refine-section" id="refineSection">
+        <h2>⚙️ Refine Your Strategy</h2>
+        <p style="color:#a0a0c0; margin-bottom:20px;">Add any specific requirements or constraints</p>
+        <div class="form-group">
+            <label>Additional Requirements (Optional)</label>
+            <textarea id="refinement" rows="3" placeholder="e.g. Focus only on Instagram. No paid ads. Target college students..."></textarea>
+        </div>
+        <button class="btn" onclick="generateReport()">📊 Generate Full Strategy Report</button>
+    </div>
+
+    <div class="card report-section" id="reportSection">
+        <h2>📈 Your Complete Marketing Strategy Report</h2>
+        <div class="report-content" id="reportContent"></div>
+        <button class="btn" style="margin-top:20px;" onclick="startOver()">🔄 Start New Analysis</button>
+    </div>
+
+</div>
+
+<script>
+    let selectedStrategy = '';
+    let originalStrategies = '';
+    let companyProfile = {};
+
+    function generateStrategies() {
+        const channels = [...document.querySelectorAll('.checkbox-group input:checked')].map(c => c.value).join(', ') || 'None selected';
+
+        companyProfile = {
+            company_name: document.getElementById('company_name').value,
+            industry: document.getElementById('industry').value,
+            business_type: document.getElementById('business_type').value,
+            budget: document.getElementById('budget').value,
+            goal: document.getElementById('goal').value,
+            location: document.getElementById('location').value,
+            employees: document.getElementById('employees').value,
+            challenge: document.getElementById('challenge').value,
+            target_age: document.getElementById('target_age').value,
+            marketing_channels: channels
+        };
+
+        if (!companyProfile.company_name || !companyProfile.industry || !companyProfile.goal) {
+            alert('Please fill in at least Company Name, Industry, and Goal');
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loadingText').textContent = 'Agent is analyzing your company profile...';
+        document.querySelector('.btn').disabled = true;
+        setPhase(2);
+
+        fetch('/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(companyProfile)
+        })
+        .then(r => r.json())
+        .then(data => {
+            originalStrategies = data.strategy;
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('strategiesSection').style.display = 'block';
+
+            const strategies = data.strategy.split(/Strategy [123]/i).filter(s => s.trim());
+            const container = document.getElementById('strategiesContent');
+            container.innerHTML = '';
+
+            if (strategies.length >= 2) {
+                strategies.forEach((strategy, index) => {
+                    if (strategy.trim()) {
+                        const card = document.createElement('div');
+                        card.className = 'strategy-card';
+                        card.innerHTML = `<strong style="color:#667eea; font-size:1.1em;">Strategy ${index + 1}</strong><div class="strategy-content" style="margin-top:10px;">${strategy.trim()}</div>`;
+                        card.onclick = () => selectStrategy(card, `Strategy ${index + 1}: ${strategy.trim()}`);
+                        container.appendChild(card);
+                    }
+                });
+            } else {
+                container.innerHTML = `<div class="strategy-content">${data.strategy}</div><button class="btn" style="margin-top:20px;" onclick="proceedToRefine()">Continue →</button>`;
+            }
+        })
+        .catch(err => {
+            document.getElementById('loading').style.display = 'none';
+            alert('Error connecting to agent. Make sure app.py is running.');
+        });
+    }
+
+    function selectStrategy(card, strategy) {
+        document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedStrategy = strategy;
+        document.getElementById('refineSection').style.display = 'block';
+        setPhase(3);
+        document.getElementById('refineSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function proceedToRefine() {
+        selectedStrategy = originalStrategies;
+        document.getElementById('refineSection').style.display = 'block';
+        setPhase(3);
+    }
+
+    function generateReport() {
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('loadingText').textContent = 'Agent is building your complete strategy report...';
+        setPhase(4);
+
+        fetch('/refine', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                original_strategy: originalStrategies,
+                user_choice: selectedStrategy,
+                refinement: document.getElementById('refinement').value,
+                company_profile: JSON.stringify(companyProfile)
+            })
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('reportSection').style.display = 'block';
+            document.getElementById('reportContent').textContent = data.report;
+            document.getElementById('reportSection').scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(err => {
+            document.getElementById('loading').style.display = 'none';
+            alert('Error generating report.');
+        });
+    }
+
+    function setPhase(num) {
+        for (let i = 1; i <= 4; i++) {
+            const el = document.getElementById(`phase${i}`);
+            if (i < num) { el.className = 'phase done'; }
+            else if (i === num) { el.className = 'phase active'; }
+            else { el.className = 'phase'; }
+        }
+    }
+
+    function startOver() { location.reload(); }
+</script>
+
+</body>
+</html>
