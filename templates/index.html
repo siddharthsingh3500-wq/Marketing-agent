@@ -3,216 +3,424 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketing Strategy Agent</title>
+    <title>Strategy Pilot</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; }
-        .header h1 { font-size: 2.5em; font-weight: 700; }
-        .header p { opacity: 0.9; margin-top: 8px; font-size: 1.1em; }
-        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-        .card { background: #1a1a2e; border-radius: 16px; padding: 35px; margin-bottom: 25px; border: 1px solid #2a2a4a; }
-        .card h2 { color: #667eea; margin-bottom: 20px; font-size: 1.4em; }
+        body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #1a202c; min-height: 100vh; }
+
+        .header { 
+            background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 40%, #4299e1 70%, #667eea 100%);
+            padding: 50px 30px; text-align: center; position: relative; overflow: hidden;
+        }
+        .header::before {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .header-badge {
+            display: inline-block; background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3); color: white;
+            padding: 6px 16px; border-radius: 20px; font-size: 0.8em;
+            font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 15px;
+        }
+        .header h1 { font-size: 3em; font-weight: 800; color: white; line-height: 1.2; position: relative; }
+        .header h1 span {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .header p { color: rgba(255,255,255,0.85); margin-top: 12px; font-size: 1.1em; font-weight: 300; position: relative; }
+        .header-stats { display: flex; justify-content: center; gap: 40px; margin-top: 30px; position: relative; }
+        .stat { text-align: center; color: white; }
+        .stat-number { font-size: 1.8em; font-weight: 800; color: #ffd700; }
+        .stat-label { font-size: 0.75em; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .phase-bar {
+            background: white; padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .phase-indicator { 
+            display: flex; justify-content: center;
+            max-width: 600px; margin: 0 auto; position: relative;
+        }
+        .phase-indicator::before {
+            content: ''; position: absolute; top: 20px; left: 10%; width: 80%;
+            height: 2px; background: #e2e8f0; z-index: 0;
+        }
+        .phase { 
+            display: flex; flex-direction: column; align-items: center;
+            gap: 6px; position: relative; z-index: 1; flex: 1; cursor: pointer;
+        }
+        .phase-circle {
+            width: 40px; height: 40px; border-radius: 50%; background: white;
+            border: 2px solid #e2e8f0; display: flex; align-items: center;
+            justify-content: center; font-weight: 700; font-size: 0.9em;
+            color: #a0aec0; transition: all 0.3s ease;
+        }
+        .phase-label { font-size: 0.7em; font-weight: 600; color: #a0aec0; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; }
+        .phase.active .phase-circle { background: linear-gradient(135deg, #2b6cb0, #667eea); border-color: transparent; color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.4); transform: scale(1.1); }
+        .phase.active .phase-label { color: #2b6cb0; font-weight: 700; }
+        .phase.done .phase-circle { background: linear-gradient(135deg, #38a169, #48bb78); border-color: transparent; color: white; }
+        .phase.done .phase-label { color: #38a169; }
+        .phase.done:hover .phase-circle { transform: scale(1.1); box-shadow: 0 4px 15px rgba(56,161,105,0.3); }
+
+        .wizard-container { max-width: 960px; margin: 0 auto; padding: 40px 20px; }
+        .wizard-step { display: none; opacity: 0; }
+        .wizard-step.active { display: block; opacity: 1; transition: opacity 0.4s ease; }
+
+        .card { background: white; border-radius: 20px; padding: 40px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+        .card-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f7fafc; }
+        .card-icon { width: 50px; height: 50px; border-radius: 14px; background: linear-gradient(135deg, #ebf4ff, #c3dafe); display: flex; align-items: center; justify-content: center; font-size: 1.4em; flex-shrink: 0; }
+        .card h2 { color: #1a365d; font-size: 1.4em; font-weight: 700; }
+        .card-subtitle { color: #718096; font-size: 0.85em; margin-top: 2px; }
+
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .form-group { display: flex; flex-direction: column; }
-        .form-group label { color: #a0a0c0; margin-bottom: 8px; font-size: 0.9em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-group input, .form-group select, .form-group textarea { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 12px; color: #fff; font-size: 1em; transition: border-color 0.3s; }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #667eea; }
-        .form-group select option { background: #1a1a2e; }
+        .form-group label { color: #4a5568; margin-bottom: 8px; font-size: 0.82em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select, .form-group textarea { background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; color: #1a202c; font-size: 0.95em; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #4299e1; background: white; box-shadow: 0 0 0 3px rgba(66,153,225,0.1); }
         .full-width { grid-column: 1 / -1; }
-        .btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; padding: 15px 40px; border-radius: 10px; font-size: 1.1em; font-weight: 600; cursor: pointer; width: 100%; margin-top: 10px; transition: opacity 0.3s; }
-        .btn:hover { opacity: 0.9; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        .loading { text-align: center; padding: 30px; color: #667eea; font-size: 1.1em; display: none; }
-        .spinner { width: 40px; height: 40px; border: 3px solid #2a2a4a; border-top-color: #667eea; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .strategies { display: none; }
-        .strategy-card { background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 12px; padding: 25px; margin-bottom: 15px; cursor: pointer; transition: all 0.3s; }
-        .strategy-card:hover { border-color: #667eea; transform: translateY(-2px); }
-        .strategy-card.selected { border-color: #667eea; background: #1a1a3e; }
-        .strategy-content { white-space: pre-wrap; line-height: 1.7; color: #c0c0e0; }
-        .refine-section { display: none; }
-        .report-section { display: none; }
-        .report-content { white-space: pre-wrap; line-height: 1.8; color: #c0c0e0; background: #0f0f1a; padding: 25px; border-radius: 12px; border: 1px solid #2a2a4a; }
-        .phase-indicator { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
-        .phase { padding: 8px 20px; border-radius: 20px; font-size: 0.85em; font-weight: 600; background: #1a1a2e; color: #606080; border: 1px solid #2a2a4a; }
-        .phase.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; border-color: transparent; }
-        .phase.done { background: #1a3a1a; color: #40c040; border-color: #40c040; }
+        .website-input-wrapper { position: relative; }
+        .website-input-wrapper input { padding-left: 45px !important; }
+        .website-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 1.1em; }
+        .website-hint { font-size: 0.78em; color: #718096; margin-top: 6px; }
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
-        .checkbox-item { display: flex; align-items: center; gap: 6px; background: #0f0f1a; border: 1px solid #2a2a4a; border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: all 0.3s; }
-        .checkbox-item:hover { border-color: #667eea; }
-        .checkbox-item input { accent-color: #667eea; width: 16px; height: 16px; }
-        .checkbox-item span { color: #c0c0e0; font-size: 0.9em; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 9px 14px; cursor: pointer; transition: all 0.2s; font-size: 0.88em; font-weight: 500; }
+        .checkbox-item:hover { border-color: #4299e1; background: #ebf4ff; }
+        .checkbox-item input { accent-color: #2b6cb0; width: 15px; height: 15px; }
+        .checkbox-item span { color: #4a5568; }
+
+        .btn-primary { background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 50%, #667eea 100%); color: white; border: none; padding: 16px 40px; border-radius: 12px; font-size: 1em; font-weight: 700; font-family: 'Inter', sans-serif; cursor: pointer; width: 100%; transition: all 0.3s; letter-spacing: 0.5px; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(43,108,176,0.35); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-back { background: white; color: #4a5568; border: 2px solid #e2e8f0; padding: 12px 25px; border-radius: 10px; font-size: 0.9em; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+        .btn-back:hover { border-color: #4299e1; color: #2b6cb0; background: #ebf4ff; }
+        .btn-row { display: flex; gap: 15px; align-items: center; margin-top: 20px; }
+        .btn-row .btn-primary { flex: 1; }
+
+        .loading { text-align: center; padding: 60px 40px; }
+        .spinner { width: 55px; height: 55px; border: 4px solid #e2e8f0; border-top-color: #2b6cb0; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { color: #2b6cb0; font-weight: 700; font-size: 1.1em; }
+        .loading-sub { color: #a0aec0; font-size: 0.85em; margin-top: 8px; }
+        .loading-dots { display: flex; justify-content: center; gap: 6px; margin-top: 20px; }
+        .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: #4299e1; animation: dotPulse 1.4s ease-in-out infinite; }
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotPulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+        .strategy-card { background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px; margin-bottom: 15px; cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden; }
+        .strategy-card::before { content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: linear-gradient(135deg, #2b6cb0, #667eea); opacity: 0; transition: opacity 0.25s; }
+        .strategy-card:hover { border-color: #4299e1; background: white; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(66,153,225,0.12); }
+        .strategy-card:hover::before { opacity: 1; }
+        .strategy-card.selected { border-color: #2b6cb0; background: white; box-shadow: 0 6px 20px rgba(43,108,176,0.12); }
+        .strategy-card.selected::before { opacity: 1; }
+        .strategy-number { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #2b6cb0, #667eea); color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82em; font-weight: 700; margin-bottom: 18px; }
+        .select-hint { text-align: center; color: #718096; font-size: 0.85em; margin-bottom: 20px; padding: 10px; background: #f7fafc; border-radius: 10px; border: 1px dashed #e2e8f0; }
+
+        .strategy-name-title {
+            font-size: 1.05em; font-weight: 700; color: #1a365d;
+            margin-bottom: 18px; padding: 10px 15px;
+            background: linear-gradient(135deg, #ebf4ff, #e8f4fd);
+            border-radius: 8px; border-left: 3px solid #2b6cb0;
+        }
+        .strategy-section { margin-bottom: 16px; }
+        .strategy-section-title { font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #2b6cb0; margin-bottom: 10px; padding: 6px 12px; background: #ebf4ff; border-radius: 6px; display: inline-block; }
+        .strategy-bullet { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding-left: 5px; }
+        .strategy-bullet-dot { width: 6px; height: 6px; border-radius: 50%; background: #4299e1; flex-shrink: 0; margin-top: 7px; }
+        .strategy-bullet-text { font-size: 0.9em; color: #4a5568; line-height: 1.6; }
+
+        .report-block { background: #f7fafc; border-radius: 14px; padding: 25px; margin-bottom: 18px; border-left: 4px solid #2b6cb0; }
+        .report-block-title { font-size: 0.82em; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: #1a365d; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .report-block-title::before { content: ''; display: block; width: 8px; height: 8px; border-radius: 50%; background: linear-gradient(135deg, #2b6cb0, #667eea); flex-shrink: 0; }
+        .report-bullet { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+        .report-bullet-dot { width: 5px; height: 5px; border-radius: 50%; background: #4299e1; flex-shrink: 0; margin-top: 8px; }
+        .report-bullet-text { font-size: 0.9em; color: #4a5568; line-height: 1.65; }
+
+        .selected-preview { background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 15px; font-size: 0.88em; color: #4a5568; line-height: 1.6; max-height: 120px; overflow-y: auto; }
+        .footer { text-align: center; padding: 30px; color: #a0aec0; font-size: 0.82em; }
+        .footer span { color: #2b6cb0; font-weight: 600; }
+
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .header h1 { font-size: 2em; } .header-stats { gap: 20px; } }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>🎯 Marketing Strategy Agent</h1>
-    <p>AI-powered marketing strategies tailored to your business</p>
+    <div class="header-badge">✦ AI Powered</div>
+    <h1>Strategy <span>Pilot</span></h1>
+    <p>Personalized marketing strategies built around your business — in minutes</p>
+    <div class="header-stats">
+        <div class="stat"><div class="stat-number">3</div><div class="stat-label">Custom Strategies</div></div>
+        <div class="stat"><div class="stat-number">4</div><div class="stat-label">Agent Phases</div></div>
+        <div class="stat"><div class="stat-number">90</div><div class="stat-label">Day Action Plan</div></div>
+    </div>
 </div>
 
-<div class="container">
-
+<div class="phase-bar">
     <div class="phase-indicator">
-        <div class="phase active" id="phase1">① Company Profile</div>
-        <div class="phase" id="phase2">② Strategy Options</div>
-        <div class="phase" id="phase3">③ Refine</div>
-        <div class="phase" id="phase4">④ Final Report</div>
+        <div class="phase active" id="phase1" onclick="handlePhaseClick(1)">
+            <div class="phase-circle" id="pc1">1</div>
+            <div class="phase-label">Profile</div>
+        </div>
+        <div class="phase" id="phase2" onclick="handlePhaseClick(2)">
+            <div class="phase-circle" id="pc2">2</div>
+            <div class="phase-label">Strategies</div>
+        </div>
+        <div class="phase" id="phase3" onclick="handlePhaseClick(3)">
+            <div class="phase-circle" id="pc3">3</div>
+            <div class="phase-label">Refine</div>
+        </div>
+        <div class="phase" id="phase4" onclick="handlePhaseClick(4)">
+            <div class="phase-circle" id="pc4">4</div>
+            <div class="phase-label">Report</div>
+        </div>
     </div>
+</div>
 
-    <div class="card" id="profileSection">
-        <h2>📋 Tell us about your company</h2>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Company Name</label>
-                <input type="text" id="company_name" placeholder="e.g. TechStart India">
+<div class="wizard-container">
+
+    <!-- STEP 1 -->
+    <div class="wizard-step active" id="step1">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">📋</div>
+                <div><h2>Company Profile</h2><div class="card-subtitle">Tell us about your business so we can craft the perfect strategy</div></div>
             </div>
-            <div class="form-group">
-                <label>Industry</label>
-                <select id="industry">
-                    <option value="">Select Industry</option>
-                    <option>E-commerce</option>
-                    <option>Food & Beverage</option>
-                    <option>Healthcare</option>
-                    <option>Education</option>
-                    <option>Real Estate</option>
-                    <option>Fashion & Apparel</option>
-                    <option>Technology / SaaS</option>
-                    <option>Retail</option>
-                    <option>Finance</option>
-                    <option>Manufacturing</option>
-                    <option>Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Business Type</label>
-                <select id="business_type">
-                    <option value="">Select Type</option>
-                    <option>B2B (Selling to businesses)</option>
-                    <option>B2C (Selling to consumers)</option>
-                    <option>Both B2B and B2C</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Target Age Group</label>
-                <select id="target_age">
-                    <option value="">Select Age Group</option>
-                    <option>13-17 (Gen Z Teens)</option>
-                    <option>18-24 (Young Adults)</option>
-                    <option>25-35 (Millennials)</option>
-                    <option>36-50 (Gen X)</option>
-                    <option>50+ (Senior)</option>
-                    <option>All Age Groups</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Monthly Marketing Budget</label>
-                <select id="budget">
-                    <option value="">Select Budget</option>
-                    <option>Under ₹50,000</option>
-                    <option>₹50,000 - ₹2,00,000</option>
-                    <option>₹2,00,000 - ₹5,00,000</option>
-                    <option>₹5,00,000 - ₹20,00,000</option>
-                    <option>Above ₹20,00,000</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Number of Employees</label>
-                <select id="employees">
-                    <option value="">Select Size</option>
-                    <option>1-10 (Startup)</option>
-                    <option>11-50 (Small)</option>
-                    <option>51-200 (Medium)</option>
-                    <option>201-500 (Large)</option>
-                    <option>500+ (Enterprise)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Primary Goal</label>
-                <select id="goal">
-                    <option value="">Select Goal</option>
-                    <option>Brand Awareness</option>
-                    <option>Lead Generation</option>
-                    <option>Customer Retention</option>
-                    <option>Sales Growth</option>
-                    <option>Market Expansion</option>
-                    <option>Product Launch</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Location / Target Market</label>
-                <input type="text" id="location" placeholder="e.g. Mumbai, Pan India">
-            </div>
-            <div class="form-group full-width">
-                <label>Current Marketing Channels (Select all that apply)</label>
-                <div class="checkbox-group">
-                    <label class="checkbox-item"><input type="checkbox" value="Instagram"> <span>📱 Instagram</span></label>
-                    <label class="checkbox-item"><input type="checkbox" value="Facebook"> <span>📘 Facebook</span></label>
-                    <label class="checkbox-item"><input type="checkbox" value="YouTube"> <span>▶️ YouTube</span></label>
-                    <label class="checkbox-item"><input type="checkbox" value="LinkedIn"> <span>💼 LinkedIn</span></label>
-                    <label class="checkbox-item"><input type="checkbox" value="Google Ads"> <span>🔍 Google Ads</span></label>
-                    <label class="checkbox-item"><input type="checkbox" value="Email Marketing"> <span>📧 Email</span></label>
-                    <label class="checkbox-item"><input type="checkbox" value="WhatsApp"> <span>💬 WhatsApp</span></label>
-                    <label class="checkbox-item"><input type="checkbox" value="None yet"> <span>🚀 None yet</span></label>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Company Name</label>
+                    <input type="text" id="company_name" placeholder="e.g. TechStart India">
+                </div>
+                <div class="form-group">
+                    <label>Industry</label>
+                    <select id="industry">
+                        <option value="">Select Industry</option>
+                        <option>E-commerce</option><option>Food & Beverage</option>
+                        <option>Healthcare</option><option>Education</option>
+                        <option>Real Estate</option><option>Fashion & Apparel</option>
+                        <option>Technology / SaaS</option><option>Retail</option>
+                        <option>Finance</option><option>Manufacturing</option><option>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Business Type</label>
+                    <select id="business_type">
+                        <option value="">Select Type</option>
+                        <option>B2B (Selling to businesses)</option>
+                        <option>B2C (Selling to consumers)</option>
+                        <option>Both B2B and B2C</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Age Group</label>
+                    <select id="target_age">
+                        <option value="">Select Age Group</option>
+                        <option>13-17 (Gen Z Teens)</option><option>18-24 (Young Adults)</option>
+                        <option>25-35 (Millennials)</option><option>36-50 (Gen X)</option>
+                        <option>50+ (Senior)</option><option>All Age Groups</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Monthly Marketing Budget</label>
+                    <select id="budget">
+                        <option value="">Select Budget</option>
+                        <option>Under ₹50,000</option><option>₹50,000 - ₹2,00,000</option>
+                        <option>₹2,00,000 - ₹5,00,000</option><option>₹5,00,000 - ₹20,00,000</option>
+                        <option>Above ₹20,00,000</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of Employees</label>
+                    <select id="employees">
+                        <option value="">Select Size</option>
+                        <option>1-10 (Startup)</option><option>11-50 (Small)</option>
+                        <option>51-200 (Medium)</option><option>201-500 (Large)</option>
+                        <option>500+ (Enterprise)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Primary Goal</label>
+                    <select id="goal">
+                        <option value="">Select Goal</option>
+                        <option>Brand Awareness</option><option>Lead Generation</option>
+                        <option>Customer Retention</option><option>Sales Growth</option>
+                        <option>Market Expansion</option><option>Product Launch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Location / Target Market</label>
+                    <input type="text" id="location" placeholder="e.g. Mumbai, Pan India">
+                </div>
+                <div class="form-group full-width">
+                    <label>🌐 Company Website (Optional but Recommended)</label>
+                    <div class="website-input-wrapper">
+                        <span class="website-icon">🔗</span>
+                        <input type="text" id="website_url" placeholder="e.g. https://www.yourcompany.com">
+                    </div>
+                    <div class="website-hint">💡 Adding your website helps the agent understand your brand and generate more personalized strategies</div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Current Marketing Channels</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item"><input type="checkbox" value="Instagram"> <span>📱 Instagram</span></label>
+                        <label class="checkbox-item"><input type="checkbox" value="Facebook"> <span>📘 Facebook</span></label>
+                        <label class="checkbox-item"><input type="checkbox" value="YouTube"> <span>▶️ YouTube</span></label>
+                        <label class="checkbox-item"><input type="checkbox" value="LinkedIn"> <span>💼 LinkedIn</span></label>
+                        <label class="checkbox-item"><input type="checkbox" value="Google Ads"> <span>🔍 Google Ads</span></label>
+                        <label class="checkbox-item"><input type="checkbox" value="Email Marketing"> <span>📧 Email</span></label>
+                        <label class="checkbox-item"><input type="checkbox" value="WhatsApp"> <span>💬 WhatsApp</span></label>
+                        <label class="checkbox-item"><input type="checkbox" value="None yet"> <span>🚀 None yet</span></label>
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Biggest Marketing Challenge</label>
+                    <select id="challenge">
+                        <option value="">Select Challenge</option>
+                        <option>Low brand awareness</option><option>Not enough leads</option>
+                        <option>Low social media engagement</option><option>High customer acquisition cost</option>
+                        <option>Strong competition</option><option>Limited budget</option>
+                        <option>Unclear target audience</option><option>Poor customer retention</option>
+                        <option>Other</option>
+                    </select>
                 </div>
             </div>
-            <div class="form-group full-width">
-                <label>Biggest Marketing Challenge</label>
-                <select id="challenge">
-                    <option value="">Select Challenge</option>
-                    <option>Low brand awareness</option>
-                    <option>Not enough leads</option>
-                    <option>Low social media engagement</option>
-                    <option>High customer acquisition cost</option>
-                    <option>Strong competition</option>
-                    <option>Limited budget</option>
-                    <option>Unclear target audience</option>
-                    <option>Poor customer retention</option>
-                    <option>Other</option>
-                </select>
+            <div class="btn-row" style="margin-top:25px;">
+                <button class="btn-primary" onclick="generateStrategies()">🚀 Generate My Marketing Strategies</button>
             </div>
         </div>
-        <button class="btn" onclick="generateStrategies()">🚀 Generate Marketing Strategies</button>
     </div>
 
-    <div class="loading" id="loading">
-        <div class="spinner"></div>
-        <p id="loadingText">Agent is analyzing your company profile...</p>
-    </div>
-
-    <div class="card strategies" id="strategiesSection">
-        <h2>💡 Your 3 Tailored Marketing Strategies</h2>
-        <p style="color:#a0a0c0; margin-bottom:20px;">Click on the strategy that best fits your vision</p>
-        <div id="strategiesContent"></div>
-    </div>
-
-    <div class="card refine-section" id="refineSection">
-        <h2>⚙️ Refine Your Strategy</h2>
-        <p style="color:#a0a0c0; margin-bottom:20px;">Add any specific requirements or constraints</p>
-        <div class="form-group">
-            <label>Additional Requirements (Optional)</label>
-            <textarea id="refinement" rows="3" placeholder="e.g. Focus only on Instagram. No paid ads. Target college students..."></textarea>
+    <!-- STEP 2 -->
+    <div class="wizard-step" id="step2">
+        <div class="card" id="loadingCard">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div class="loading-text" id="loadingText">Analyzing your company profile...</div>
+                <div class="loading-sub">This usually takes 10-15 seconds</div>
+                <div class="loading-dots">
+                    <div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>
+                </div>
+            </div>
         </div>
-        <button class="btn" onclick="generateReport()">📊 Generate Full Strategy Report</button>
+        <div class="card" id="strategiesCard" style="display:none;">
+            <div class="card-header">
+                <div class="card-icon">💡</div>
+                <div><h2>Your 3 Marketing Strategies</h2><div class="card-subtitle">Each strategy is tailored specifically to your business</div></div>
+            </div>
+            <div class="select-hint">👆 Click on a strategy card to select it and continue</div>
+            <div id="strategiesContent"></div>
+            <div class="btn-row">
+                <button class="btn-back" onclick="goToStep(1, 'backward')">← Back to Profile</button>
+            </div>
+        </div>
     </div>
 
-    <div class="card report-section" id="reportSection">
-        <h2>📈 Your Complete Marketing Strategy Report</h2>
-        <div class="report-content" id="reportContent"></div>
-        <button class="btn" style="margin-top:20px;" onclick="startOver()">🔄 Start New Analysis</button>
+    <!-- STEP 3 -->
+    <div class="wizard-step" id="step3">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon">⚙️</div>
+                <div><h2>Refine Your Strategy</h2><div class="card-subtitle">Add any specific requirements before generating your full report</div></div>
+            </div>
+            <div class="form-group">
+                <label>Your Selected Strategy</label>
+                <div class="selected-preview" id="selectedStrategyPreview"></div>
+            </div>
+            <div class="form-group" style="margin-top:20px;">
+                <label>Additional Requirements (Optional)</label>
+                <textarea id="refinement" rows="3" placeholder="e.g. Focus only on Instagram. No paid ads. Target college students only..."></textarea>
+            </div>
+            <div class="btn-row">
+                <button class="btn-back" onclick="goToStep(2, 'backward')">← Back to Strategies</button>
+                <button class="btn-primary" onclick="generateReport()">📊 Generate Full Strategy Report</button>
+            </div>
+        </div>
     </div>
 
+    <!-- STEP 4 -->
+    <div class="wizard-step" id="step4">
+        <div class="card" id="reportLoadingCard">
+            <div class="loading">
+                <div class="spinner"></div>
+                <div class="loading-text">Building your complete strategy report...</div>
+                <div class="loading-sub">Crafting your personalized 90-day plan</div>
+                <div class="loading-dots">
+                    <div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card" id="reportCard" style="display:none;">
+            <div class="card-header">
+                <div class="card-icon">📈</div>
+                <div><h2>Your Complete Strategy Report</h2><div class="card-subtitle">A comprehensive, actionable plan built for your business</div></div>
+            </div>
+            <div id="reportContent"></div>
+            <div class="btn-row" style="margin-top:25px;">
+                <button class="btn-back" onclick="goToStep(3, 'backward')">← Back to Refine</button>
+                <button class="btn-primary" onclick="startOver()">🔄 Start New Analysis</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    Built with ❤️ by <span>Siddharth Singh</span> · Powered by Llama AI · <span>Strategy Pilot</span>
 </div>
 
 <script>
     let selectedStrategy = '';
     let originalStrategies = '';
     let companyProfile = {};
+    let currentStep = 1;
+    let completedSteps = new Set([1]);
+
+    function goToStep(targetStep, direction) {
+        if (targetStep === currentStep) return;
+        const currentEl = document.getElementById(`step${currentStep}`);
+        const targetEl = document.getElementById(`step${targetStep}`);
+
+        currentEl.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        currentEl.style.opacity = '0';
+        currentEl.style.transform = direction === 'forward' ? 'translateX(-30px)' : 'translateX(30px)';
+
+        setTimeout(() => {
+            currentEl.style.display = 'none';
+            currentEl.style.transform = '';
+            currentEl.style.transition = '';
+            currentEl.style.opacity = '1';
+            currentEl.className = 'wizard-step';
+
+            targetEl.style.display = 'block';
+            targetEl.style.opacity = '0';
+            targetEl.style.transform = direction === 'forward' ? 'translateX(30px)' : 'translateX(-30px)';
+
+            setTimeout(() => {
+                targetEl.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                targetEl.style.opacity = '1';
+                targetEl.style.transform = 'translateX(0)';
+                targetEl.className = 'wizard-step active';
+                setTimeout(() => { targetEl.style.transition = ''; }, 300);
+            }, 20);
+
+            currentStep = targetStep;
+            setPhase(targetStep);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 250);
+    }
+
+    function handlePhaseClick(step) {
+        if (step < currentStep && completedSteps.has(step)) {
+            goToStep(step, 'backward');
+        }
+    }
 
     function generateStrategies() {
         const channels = [...document.querySelectorAll('.checkbox-group input:checked')].map(c => c.value).join(', ') || 'None selected';
-
         companyProfile = {
             company_name: document.getElementById('company_name').value,
             industry: document.getElementById('industry').value,
@@ -223,7 +431,8 @@
             employees: document.getElementById('employees').value,
             challenge: document.getElementById('challenge').value,
             target_age: document.getElementById('target_age').value,
-            marketing_channels: channels
+            marketing_channels: channels,
+            website_url: document.getElementById('website_url').value
         };
 
         if (!companyProfile.company_name || !companyProfile.industry || !companyProfile.goal) {
@@ -231,10 +440,14 @@
             return;
         }
 
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('loadingText').textContent = 'Agent is analyzing your company profile...';
-        document.querySelector('.btn').disabled = true;
-        setPhase(2);
+        document.getElementById('loadingCard').style.display = 'block';
+        document.getElementById('strategiesCard').style.display = 'none';
+        document.getElementById('loadingText').textContent = companyProfile.website_url ?
+            '🌐 Reading your website and analyzing profile...' :
+            '🧠 Analyzing your company profile...';
+
+        goToStep(2, 'forward');
+        completedSteps.add(2);
 
         fetch('/analyze', {
             method: 'POST',
@@ -244,8 +457,8 @@
         .then(r => r.json())
         .then(data => {
             originalStrategies = data.strategy;
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('strategiesSection').style.display = 'block';
+            document.getElementById('loadingCard').style.display = 'none';
+            document.getElementById('strategiesCard').style.display = 'block';
 
             const strategies = data.strategy.split(/Strategy [123]/i).filter(s => s.trim());
             const container = document.getElementById('strategiesContent');
@@ -256,40 +469,121 @@
                     if (strategy.trim()) {
                         const card = document.createElement('div');
                         card.className = 'strategy-card';
-                        card.innerHTML = `<strong style="color:#667eea; font-size:1.1em;">Strategy ${index + 1}</strong><div class="strategy-content" style="margin-top:10px;">${strategy.trim()}</div>`;
-                        card.onclick = () => selectStrategy(card, `Strategy ${index + 1}: ${strategy.trim()}`);
+                        card.innerHTML = `
+                            <div class="strategy-number">✦ Strategy ${index + 1}</div>
+                            <div class="strategy-body">${formatStrategy(strategy.trim())}</div>
+                        `;
+                        card.onclick = () => selectStrategy(card, strategy.trim(), index + 1);
                         container.appendChild(card);
                     }
                 });
             } else {
-                container.innerHTML = `<div class="strategy-content">${data.strategy}</div><button class="btn" style="margin-top:20px;" onclick="proceedToRefine()">Continue →</button>`;
+                container.innerHTML = `<div class="strategy-body">${formatStrategy(data.strategy)}</div>`;
             }
         })
-        .catch(err => {
-            document.getElementById('loading').style.display = 'none';
+        .catch(() => {
+            document.getElementById('loadingCard').style.display = 'none';
             alert('Error connecting to agent. Make sure app.py is running.');
         });
     }
 
-    function selectStrategy(card, strategy) {
-        document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedStrategy = strategy;
-        document.getElementById('refineSection').style.display = 'block';
-        setPhase(3);
-        document.getElementById('refineSection').scrollIntoView({ behavior: 'smooth' });
+    function formatStrategy(text) {
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l && l !== '##' && l !== '#');
+        let html = '';
+        let currentSection = '';
+        let bullets = [];
+
+        function flushSection() {
+            if (currentSection) {
+                html += `<div class="strategy-section">`;
+                html += `<div class="strategy-section-title">${currentSection}</div>`;
+                bullets.forEach(b => {
+                    html += `<div class="strategy-bullet"><div class="strategy-bullet-dot"></div><div class="strategy-bullet-text">${b}</div></div>`;
+                });
+                html += `</div>`;
+                bullets = [];
+                currentSection = '';
+            } else if (bullets.length > 0) {
+                bullets.forEach(b => {
+                    html += `<div class="strategy-bullet"><div class="strategy-bullet-dot"></div><div class="strategy-bullet-text">${b}</div></div>`;
+                });
+                bullets = [];
+            }
+        }
+
+        lines.forEach(line => {
+            const clean = line.replace(/^[•\-\*]\s*/, '').replace(/\*\*/g, '').replace(/##/g, '').trim();
+            if (!clean) return;
+
+            const isBullet = line.startsWith('•') || line.startsWith('-') || line.startsWith('*');
+
+            if (clean.toLowerCase().startsWith('strategy name:')) {
+                flushSection();
+                const name = clean.replace(/strategy name:/i, '').trim();
+                html += `<div class="strategy-name-title">${name}</div>`;
+            } else if (!isBullet && clean.endsWith(':') && clean.length < 60) {
+                flushSection();
+                currentSection = clean.replace(':', '').trim();
+            } else if (clean) {
+                bullets.push(clean);
+            }
+        });
+        flushSection();
+
+        return html || `<div class="strategy-bullet"><div class="strategy-bullet-dot"></div><div class="strategy-bullet-text">${text}</div></div>`;
     }
 
-    function proceedToRefine() {
-        selectedStrategy = originalStrategies;
-        document.getElementById('refineSection').style.display = 'block';
-        setPhase(3);
+    function formatReport(text) {
+        const lines = text.split('\n');
+        let html = '';
+        let currentTitle = '';
+        let currentBullets = [];
+
+        function flushBlock() {
+            if (currentTitle || currentBullets.length > 0) {
+                html += `<div class="report-block">`;
+                if (currentTitle) html += `<div class="report-block-title">${currentTitle}</div>`;
+                currentBullets.forEach(b => {
+                    html += `<div class="report-bullet"><div class="report-bullet-dot"></div><div class="report-bullet-text">${b}</div></div>`;
+                });
+                html += `</div>`;
+                currentBullets = [];
+                currentTitle = '';
+            }
+        }
+
+        lines.forEach(line => {
+            line = line.trim();
+            if (!line || line === '##' || line === '#') return;
+            const cleanLine = line.replace(/^[•\-\*]\s*/, '').replace(/\*\*/g, '').replace(/##/g, '').trim();
+            const isBullet = line.startsWith('•') || line.startsWith('-') || line.startsWith('*');
+            const isHeader = cleanLine === cleanLine.toUpperCase() && cleanLine.length > 3 && cleanLine.length < 60 && !isBullet;
+
+            if (isHeader) {
+                flushBlock();
+                currentTitle = cleanLine;
+            } else if (cleanLine) {
+                currentBullets.push(cleanLine);
+            }
+        });
+        flushBlock();
+        return html;
+    }
+
+    function selectStrategy(card, strategy, num) {
+        document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedStrategy = `Strategy ${num}: ${strategy}`;
+        document.getElementById('selectedStrategyPreview').textContent = strategy.substring(0, 250) + (strategy.length > 250 ? '...' : '');
+        completedSteps.add(3);
+        setTimeout(() => goToStep(3, 'forward'), 200);
     }
 
     function generateReport() {
-        document.getElementById('loading').style.display = 'block';
-        document.getElementById('loadingText').textContent = 'Agent is building your complete strategy report...';
-        setPhase(4);
+        document.getElementById('reportLoadingCard').style.display = 'block';
+        document.getElementById('reportCard').style.display = 'none';
+        completedSteps.add(4);
+        goToStep(4, 'forward');
 
         fetch('/refine', {
             method: 'POST',
@@ -303,13 +597,12 @@
         })
         .then(r => r.json())
         .then(data => {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('reportSection').style.display = 'block';
-            document.getElementById('reportContent').textContent = data.report;
-            document.getElementById('reportSection').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('reportLoadingCard').style.display = 'none';
+            document.getElementById('reportCard').style.display = 'block';
+            document.getElementById('reportContent').innerHTML = formatReport(data.report);
         })
-        .catch(err => {
-            document.getElementById('loading').style.display = 'none';
+        .catch(() => {
+            document.getElementById('reportLoadingCard').style.display = 'none';
             alert('Error generating report.');
         });
     }
@@ -317,9 +610,17 @@
     function setPhase(num) {
         for (let i = 1; i <= 4; i++) {
             const el = document.getElementById(`phase${i}`);
-            if (i < num) { el.className = 'phase done'; }
-            else if (i === num) { el.className = 'phase active'; }
-            else { el.className = 'phase'; }
+            const circle = document.getElementById(`pc${i}`);
+            if (i < num) {
+                el.className = 'phase done';
+                circle.textContent = '✓';
+            } else if (i === num) {
+                el.className = 'phase active';
+                circle.textContent = i;
+            } else {
+                el.className = 'phase';
+                circle.textContent = i;
+            }
         }
     }
 
