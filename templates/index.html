@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strategy Pilot</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f0f4f8; color: #1a202c; min-height: 100vh; }
 
-        .header { 
+        .header {
             background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 40%, #4299e1 70%, #667eea 100%);
             padding: 50px 30px; text-align: center; position: relative; overflow: hidden;
         }
@@ -20,46 +21,20 @@
             animation: pulse 4s ease-in-out infinite;
         }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
-        .header-badge {
-            display: inline-block; background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3); color: white;
-            padding: 6px 16px; border-radius: 20px; font-size: 0.8em;
-            font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 15px;
-        }
+        .header-badge { display: inline-block; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 6px 16px; border-radius: 20px; font-size: 0.8em; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 15px; }
         .header h1 { font-size: 3em; font-weight: 800; color: white; line-height: 1.2; position: relative; }
-        .header h1 span {
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-        }
+        .header h1 span { background: linear-gradient(135deg, #ffd700, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
         .header p { color: rgba(255,255,255,0.85); margin-top: 12px; font-size: 1.1em; font-weight: 300; position: relative; }
         .header-stats { display: flex; justify-content: center; gap: 40px; margin-top: 30px; position: relative; }
         .stat { text-align: center; color: white; }
         .stat-number { font-size: 1.8em; font-weight: 800; color: #ffd700; }
         .stat-label { font-size: 0.75em; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .phase-bar {
-            background: white; padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            position: sticky; top: 0; z-index: 100;
-        }
-        .phase-indicator { 
-            display: flex; justify-content: center;
-            max-width: 600px; margin: 0 auto; position: relative;
-        }
-        .phase-indicator::before {
-            content: ''; position: absolute; top: 20px; left: 10%; width: 80%;
-            height: 2px; background: #e2e8f0; z-index: 0;
-        }
-        .phase { 
-            display: flex; flex-direction: column; align-items: center;
-            gap: 6px; position: relative; z-index: 1; flex: 1; cursor: pointer;
-        }
-        .phase-circle {
-            width: 40px; height: 40px; border-radius: 50%; background: white;
-            border: 2px solid #e2e8f0; display: flex; align-items: center;
-            justify-content: center; font-weight: 700; font-size: 0.9em;
-            color: #a0aec0; transition: all 0.3s ease;
-        }
+        .phase-bar { background: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 100; }
+        .phase-indicator { display: flex; justify-content: center; max-width: 600px; margin: 0 auto; position: relative; }
+        .phase-indicator::before { content: ''; position: absolute; top: 20px; left: 10%; width: 80%; height: 2px; background: #e2e8f0; z-index: 0; }
+        .phase { display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; z-index: 1; flex: 1; cursor: pointer; }
+        .phase-circle { width: 40px; height: 40px; border-radius: 50%; background: white; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9em; color: #a0aec0; transition: all 0.3s ease; }
         .phase-label { font-size: 0.7em; font-weight: 600; color: #a0aec0; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; }
         .phase.active .phase-circle { background: linear-gradient(135deg, #2b6cb0, #667eea); border-color: transparent; color: white; box-shadow: 0 4px 15px rgba(102,126,234,0.4); transform: scale(1.1); }
         .phase.active .phase-label { color: #2b6cb0; font-weight: 700; }
@@ -98,8 +73,10 @@
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .btn-back { background: white; color: #4a5568; border: 2px solid #e2e8f0; padding: 12px 25px; border-radius: 10px; font-size: 0.9em; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
         .btn-back:hover { border-color: #4299e1; color: #2b6cb0; background: #ebf4ff; }
-        .btn-row { display: flex; gap: 15px; align-items: center; margin-top: 20px; }
+        .btn-row { display: flex; gap: 15px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
         .btn-row .btn-primary { flex: 1; }
+        .btn-export { background: white; color: #2b6cb0; border: 2px solid #2b6cb0; padding: 12px 20px; border-radius: 10px; font-size: 0.88em; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.2s; }
+        .btn-export:hover { background: #ebf4ff; }
 
         .loading { text-align: center; padding: 60px 40px; }
         .spinner { width: 55px; height: 55px; border: 4px solid #e2e8f0; border-top-color: #2b6cb0; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
@@ -121,12 +98,11 @@
         .strategy-number { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #2b6cb0, #667eea); color: white; padding: 5px 14px; border-radius: 20px; font-size: 0.82em; font-weight: 700; margin-bottom: 18px; }
         .select-hint { text-align: center; color: #718096; font-size: 0.85em; margin-bottom: 20px; padding: 10px; background: #f7fafc; border-radius: 10px; border: 1px dashed #e2e8f0; }
 
-        .strategy-name-title {
-            font-size: 1.05em; font-weight: 700; color: #1a365d;
-            margin-bottom: 18px; padding: 10px 15px;
-            background: linear-gradient(135deg, #ebf4ff, #e8f4fd);
-            border-radius: 8px; border-left: 3px solid #2b6cb0;
-        }
+        .strategy-rating { position: absolute; top: 20px; right: 20px; background: linear-gradient(135deg, #fff8e1, #fff3cd); border: 2px solid #ffd700; border-radius: 12px; padding: 8px 14px; text-align: center; min-width: 90px; }
+        .strategy-rating-stars { font-size: 0.9em; letter-spacing: 1px; margin-bottom: 2px; }
+        .strategy-rating-text { font-size: 0.72em; font-weight: 700; color: #b7791f; text-transform: uppercase; letter-spacing: 0.5px; }
+        .strategy-rating-reason { font-size: 0.8em; color: #718096; font-style: italic; margin-bottom: 14px; padding: 8px 12px; background: #fffff0; border-radius: 8px; border-left: 3px solid #ffd700; }
+        .strategy-name-title { font-size: 1.05em; font-weight: 700; color: #1a365d; margin-bottom: 18px; padding: 10px 15px; background: linear-gradient(135deg, #ebf4ff, #e8f4fd); border-radius: 8px; border-left: 3px solid #2b6cb0; margin-right: 110px; }
         .strategy-section { margin-bottom: 16px; }
         .strategy-section-title { font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #2b6cb0; margin-bottom: 10px; padding: 6px 12px; background: #ebf4ff; border-radius: 6px; display: inline-block; }
         .strategy-bullet { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; padding-left: 5px; }
@@ -140,11 +116,14 @@
         .report-bullet-dot { width: 5px; height: 5px; border-radius: 50%; background: #4299e1; flex-shrink: 0; margin-top: 8px; }
         .report-bullet-text { font-size: 0.9em; color: #4a5568; line-height: 1.65; }
 
+        .chart-container { background: white; border-radius: 14px; padding: 25px; margin-bottom: 18px; border: 1px solid #e2e8f0; }
+        .chart-title { font-size: 0.85em; font-weight: 700; color: #1a365d; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
+
         .selected-preview { background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 10px; padding: 15px; font-size: 0.88em; color: #4a5568; line-height: 1.6; max-height: 120px; overflow-y: auto; }
         .footer { text-align: center; padding: 30px; color: #a0aec0; font-size: 0.82em; }
         .footer span { color: #2b6cb0; font-weight: 600; }
 
-        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .header h1 { font-size: 2em; } .header-stats { gap: 20px; } }
+        @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .header h1 { font-size: 2em; } .header-stats { gap: 20px; } .strategy-rating { position: relative; top: auto; right: auto; display: inline-block; margin-bottom: 15px; } .strategy-name-title { margin-right: 0; } }
     </style>
 </head>
 <body>
@@ -309,7 +288,7 @@
         <div class="card" id="strategiesCard" style="display:none;">
             <div class="card-header">
                 <div class="card-icon">💡</div>
-                <div><h2>Your 3 Marketing Strategies</h2><div class="card-subtitle">Each strategy is tailored specifically to your business</div></div>
+                <div><h2>Your 3 Marketing Strategies</h2><div class="card-subtitle">Each strategy is tailored specifically to your business — rated by AI</div></div>
             </div>
             <div class="select-hint">👆 Click on a strategy card to select it and continue</div>
             <div id="strategiesContent"></div>
@@ -359,9 +338,17 @@
                 <div><h2>Your Complete Strategy Report</h2><div class="card-subtitle">A comprehensive, actionable plan built for your business</div></div>
             </div>
             <div id="reportContent"></div>
+            <div id="chartSection" style="display:none;">
+                <div class="chart-container">
+                    <div class="chart-title">📊 Budget Allocation Breakdown</div>
+                    <canvas id="budgetChart" height="300"></canvas>
+                </div>
+            </div>
             <div class="btn-row" style="margin-top:25px;">
                 <button class="btn-back" onclick="goToStep(3, 'backward')">← Back to Refine</button>
-                <button class="btn-primary" onclick="startOver()">🔄 Start New Analysis</button>
+                <button class="btn-export" onclick="exportPDF()">📄 Export PDF</button>
+                <button class="btn-export" onclick="exportMarkdown()">📝 Export Text</button>
+                <button class="btn-primary" onclick="startOver()">🔄 New Analysis</button>
             </div>
         </div>
     </div>
@@ -378,6 +365,8 @@
     let companyProfile = {};
     let currentStep = 1;
     let completedSteps = new Set([1]);
+    let reportText = '';
+    let budgetChartInstance = null;
 
     function goToStep(targetStep, direction) {
         if (targetStep === currentStep) return;
@@ -487,6 +476,14 @@
         });
     }
 
+    function generateStars(num) {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+            stars += i <= num ? '⭐' : '☆';
+        }
+        return stars;
+    }
+
     function formatStrategy(text) {
         const lines = text.split('\n').map(l => l.trim()).filter(l => l && l !== '##' && l !== '#');
         let html = '';
@@ -514,13 +511,22 @@
         lines.forEach(line => {
             const clean = line.replace(/^[•\-\*]\s*/, '').replace(/\*\*/g, '').replace(/##/g, '').trim();
             if (!clean) return;
-
             const isBullet = line.startsWith('•') || line.startsWith('-') || line.startsWith('*');
 
             if (clean.toLowerCase().startsWith('strategy name:')) {
                 flushSection();
                 const name = clean.replace(/strategy name:/i, '').trim();
                 html += `<div class="strategy-name-title">${name}</div>`;
+            } else if (clean.toLowerCase().startsWith('rating reason:')) {
+                const reason = clean.replace(/rating reason:/i, '').trim();
+                html += `<div class="strategy-rating-reason">💬 ${reason}</div>`;
+            } else if (clean.toLowerCase().startsWith('rating:')) {
+                const ratingVal = parseInt(clean.replace(/rating:/i, '').replace('/5', '').trim());
+                const stars = generateStars(ratingVal);
+                html += `<div class="strategy-rating">
+                    <div class="strategy-rating-stars">${stars}</div>
+                    <div class="strategy-rating-text">${ratingVal}/5 Score</div>
+                </div>`;
             } else if (!isBullet && clean.endsWith(':') && clean.length < 60) {
                 flushSection();
                 currentSection = clean.replace(':', '').trim();
@@ -534,16 +540,26 @@
     }
 
     function formatReport(text) {
+        reportText = text;
         const lines = text.split('\n');
         let html = '';
         let currentTitle = '';
         let currentBullets = [];
+        let budgetData = {};
 
         function flushBlock() {
             if (currentTitle || currentBullets.length > 0) {
                 html += `<div class="report-block">`;
                 if (currentTitle) html += `<div class="report-block-title">${currentTitle}</div>`;
                 currentBullets.forEach(b => {
+                    if (currentTitle === 'BUDGET ALLOCATION') {
+                        const parts = b.split(':');
+                        if (parts.length === 2) {
+                            const label = parts[0].trim();
+                            const pct = parseInt(parts[1]);
+                            if (!isNaN(pct)) budgetData[label] = pct;
+                        }
+                    }
                     html += `<div class="report-bullet"><div class="report-bullet-dot"></div><div class="report-bullet-text">${b}</div></div>`;
                 });
                 html += `</div>`;
@@ -567,7 +583,37 @@
             }
         });
         flushBlock();
+
+        if (Object.keys(budgetData).length > 0) {
+            setTimeout(() => renderBudgetChart(budgetData), 100);
+        }
+
         return html;
+    }
+
+    function renderBudgetChart(data) {
+        document.getElementById('chartSection').style.display = 'block';
+        const ctx = document.getElementById('budgetChart').getContext('2d');
+        if (budgetChartInstance) budgetChartInstance.destroy();
+        budgetChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(data),
+                datasets: [{
+                    data: Object.values(data),
+                    backgroundColor: ['#2b6cb0', '#4299e1', '#667eea', '#48bb78', '#ed8936', '#e53e3e', '#9f7aea'],
+                    borderWidth: 3,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { family: 'Inter', size: 13 }, padding: 20 } },
+                    tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } }
+                }
+            }
+        });
     }
 
     function selectStrategy(card, strategy, num) {
@@ -607,20 +653,27 @@
         });
     }
 
+    function exportPDF() {
+        window.print();
+    }
+
+    function exportMarkdown() {
+        const blob = new Blob([reportText], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Strategy_Pilot_Report_${companyProfile.company_name || 'Report'}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     function setPhase(num) {
         for (let i = 1; i <= 4; i++) {
             const el = document.getElementById(`phase${i}`);
             const circle = document.getElementById(`pc${i}`);
-            if (i < num) {
-                el.className = 'phase done';
-                circle.textContent = '✓';
-            } else if (i === num) {
-                el.className = 'phase active';
-                circle.textContent = i;
-            } else {
-                el.className = 'phase';
-                circle.textContent = i;
-            }
+            if (i < num) { el.className = 'phase done'; circle.textContent = '✓'; }
+            else if (i === num) { el.className = 'phase active'; circle.textContent = i; }
+            else { el.className = 'phase'; circle.textContent = i; }
         }
     }
 
