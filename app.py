@@ -75,6 +75,8 @@ Output format — follow this EXACTLY for each strategy. Each item must be on it
 
 Strategy 1
 Strategy Name: [name here]
+Rating: [X/5 — give a score from 1 to 5 based on how well it fits this company]
+Rating Reason: [one line explaining why you gave this rating]
 Why It Fits:
 - [reason 1]
 - [reason 2]
@@ -89,6 +91,8 @@ Expected ROI:
 
 Strategy 2
 Strategy Name: [name here]
+Rating: [X/5]
+Rating Reason: [one line explaining why you gave this rating]
 Why It Fits:
 - [reason 1]
 - [reason 2]
@@ -103,6 +107,8 @@ Expected ROI:
 
 Strategy 3
 Strategy Name: [name here]
+Rating: [X/5]
+Rating Reason: [one line explaining why you gave this rating]
 Why It Fits:
 - [reason 1]
 - [reason 2]
@@ -121,6 +127,7 @@ STRICT RULES:
 - Never use ## or ** or any markdown
 - Never write in paragraph form
 - Each section title ends with a colon
+- Rating must be a number from 1 to 5
 {"- Use specific details from the website data to make strategies personalized" if website_context else ""}
 """
 
@@ -166,9 +173,10 @@ MARKETING CHANNELS
 - [channel]: [one line explanation]
 
 BUDGET ALLOCATION
-- [category]: [percentage and amount]
-- [category]: [percentage and amount]
-- [category]: [percentage and amount]
+- [category]: [percentage]
+- [category]: [percentage]
+- [category]: [percentage]
+- [category]: [percentage]
 
 90-DAY ACTION PLAN
 Day 1-30:
@@ -199,6 +207,7 @@ STRICT RULES:
 - Never combine multiple bullets on one line
 - No markdown, no ## or **
 - No paragraphs
+- For BUDGET ALLOCATION always give percentages that add up to 100%
 """
 
     response = client.chat.completions.create(
